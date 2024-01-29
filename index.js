@@ -10,8 +10,8 @@ const oracleV2Addr = "0x0000000005Be70A35b6534bFBd21eC0c98B27b1f";
 const contractMultiSig = "0x000000000C1Ab3d46b1FF59C29aeF0Dd1e8369e8";
 const safeAddress = '0x00000000079b20FEd6365B38f299D40236A90119';
 
-async function changeCrabOracleOwner() {
-    const _provider = new ethers.JsonRpcProvider("https://crab-rpc.darwinia.network");
+async function changeOracleOwner(providerUrl) {
+    const _provider = new ethers.JsonRpcProvider(providerUrl);
     // init safe sdk
     const _signer = new ethers.Wallet(privateKey, _provider);
     const _adapter = new Safe.EthersAdapter({
@@ -49,10 +49,18 @@ async function changeCrabOracleOwner() {
     safeTransaction.addSignature(new Safe.EthSafeSignature("0x178E699c9a6bB2Cd624557Fbd85ed219e6faBa77", "0x01e8780e239834cc80ec1e3f52005c197cdc2f5d833aa3bb1fa542ef077d4e301149a6c3037b079172266bf90365ac0db2fd85cb7daaebdf9bf75cdd17c9e2db20"));
     safeTransaction.addSignature(new Safe.EthSafeSignature("0x9F33a4809aA708d7a399fedBa514e0A0d15EfA85", "0x9fb0f45333311995afabef7977b3b229d57d30a776763b3f96aeeeb4542e35616e51c91ed15543282c2cfeefb4649fcd296728ed7487d0e9eb9d7ed92143e8fe1f"));
     safeTransaction.addSignature(new Safe.EthSafeSignature("0xA4bE619E8C0E3889f5fA28bb0393A4862Cad35ad", "0x8fe6fdff5478ad107d77c396298450aad89ccc54e6ee4e145ddfc42276524b706f5de1f52067ffad1a9a107ad62004d87850af5d14e30b0fa280daee6eaa3e751f"));
-    
-    const executeTxResponse = await safeSdk.executeTransaction(safeTransaction)
-    const receipt = await executeTxResponse.transactionResponse?.wait()
-    console.log(`txHash: ${receipt.transactionHash}`)
+
+    // const executeTxResponse = await safeSdk.executeTransaction(safeTransaction)
+    // const receipt = await executeTxResponse.transactionResponse?.wait()
+    // console.log(`txHash: ${receipt.transactionHash}`)
 }
 
-changeCrabOracleOwner();
+function changeCrabOracleOwner() {
+    changeOracleOwner("https://crab-rpc.darwinia.network");
+}
+
+function changeArbSepOracleOwner() {
+    changeOracleOwner("https://sepolia-rollup.arbitrum.io/rpc");
+}
+
+changeArbSepOracleOwner();
