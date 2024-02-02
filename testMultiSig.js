@@ -23,7 +23,9 @@ async function testImportMessageRoot() {
     ]);
 
     const expiration = parseInt(Date.now() / 1000) + 1209600; // two weeks
-    const toSignData = ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'uint256', 'bytes'], [
+    const toSignData = ethers.AbiCoder.defaultAbiCoder().encode(['uint256', 'address', 'address', 'uint256', 'uint256', 'bytes'], [
+        1, // exec on chain Id,
+        subAPIMultiSig, // MultiSig address
         oracleV2, // oracleV2 address
         0, // value, 0, don't need pay for it.
         expiration, // expiration
