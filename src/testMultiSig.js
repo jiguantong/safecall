@@ -1,7 +1,12 @@
 import { ethers } from 'ethers';
 import { keccak256 } from "ethers";
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const TronWeb = require('tronweb')
+
 const privateKey = process.env.PRIVATE_KEY;
+const tronPrivateKey = process.env.TRON_PRIVATE_KEY;
 const providerUrl = "https://arbitrum-sepolia.publicnode.com";
 const subAPIMultiSig = "0x000000000d60704384100A29efb6C9cf8cD72820";
 const oracleV2 = "0x000000000DA67291724858F7e759A43B2d23225e";
@@ -110,11 +115,26 @@ async function tronImportMessageRoot() {
     );
     console.log(`expiration: ${expiration}\nimportRootCallData: ${importRootCallData}\ntoSignData: ${toSignData}\nhash: ${hash}\nsignature: ${signature}`);
 
-    // // exec importMessageRoot
-    // const multiSigABI = [{ "inputs": [{ "internalType": "address[]", "name": "signers", "type": "address[]" }, { "internalType": "uint64", "name": "threshold", "type": "uint64" }], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "owner", "type": "address" }], "name": "AddedOwner", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "uint256", "name": "threshold", "type": "uint256" }], "name": "ChangedThreshold", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "owner", "type": "address" }], "name": "RemovedOwner", "type": "event" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "uint256", "name": "_threshold", "type": "uint256" }], "name": "addOwnerWithThreshold", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_threshold", "type": "uint256" }], "name": "changeThreshold", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "name": "doneOf", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "uint256", "name": "expiration", "type": "uint256" }, { "internalType": "bytes", "name": "data", "type": "bytes" }, { "internalType": "bytes", "name": "signatures", "type": "bytes" }], "name": "exec", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "getOwners", "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getThreshold", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }], "name": "isOwner", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "prevOwner", "type": "address" }, { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "uint256", "name": "_threshold", "type": "uint256" }], "name": "removeOwner", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "prevOwner", "type": "address" }, { "internalType": "address", "name": "oldOwner", "type": "address" }, { "internalType": "address", "name": "newOwner", "type": "address" }], "name": "swapOwner", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "hash", "type": "bytes32" }, { "internalType": "bytes", "name": "signatures", "type": "bytes" }], "name": "verifySignatures", "outputs": [], "stateMutability": "view", "type": "function" }, { "stateMutability": "payable", "type": "receive" }];
-    // const multiSigContract = new ethers.Contract(subAPIMultiSig, multiSigABI, signer);
-    // const receipt = await multiSigContract.exec(oracleV2, 0, expiration, importRootCallData, signature);
-    // console.log("receipt: ", receipt);
+    //============================= Tron =============================
+
+    const tronWeb = new TronWeb({
+        fullHost: 'https://api.shasta.trongrid.io',
+        privateKey: tronPrivateKey
+    })
+
+    try {
+        const unsignedTx = await tronWeb.transactionBuilder.triggerSmartContract(subAPIMultiSig.replace("0x", "41"), "exec(address,uint256,uint256,bytes,bytes)", {},
+            [{ type: 'address', value: oracleV2 }, { type: 'uint256', value: 0 }, { type: 'uint256', value: expiration }, { type: 'bytes', value: importRootCallData }, { type: 'bytes', value: signature }],
+            // issuerAddress
+            "0xBFD18697f12Eda1a727cF50f203a5a5725724687".replace("0x", "41"));
+        console.log("tx: ", unsignedTx);
+        const signedTx = await tronWeb.trx.sign(unsignedTx.transaction, tronPrivateKey);
+
+        var result = await tronWeb.trx.broadcast(signedTx);
+        console.log("result", result);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
-tronImportMessageRoot()
+tronImportMessageRoot();
