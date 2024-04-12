@@ -15,7 +15,7 @@ async function main() {
             localBlock = newBlock;
             // console.log("local <= new", localBlock, newBlock);
         } else {
-            console.error("!!! local > new", localBlock, newBlock);
+            console.error(`!!! local(${localBlock}) > new(${newBlock}) diff: ${localBlock-newBlock}`);
         }
     }, 1000)
 }
