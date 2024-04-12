@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-const darwiniaRpc = "http://c2.collator.itering.io:9944";
+const darwiniaRpc = "http://c2.darwinia-rpc.itering.io:9944/";
 const moonbeamRpc = "https://moonbeam-rpc.publicnode.com";
 
 async function getBlock(number) {
