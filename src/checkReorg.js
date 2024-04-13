@@ -3,28 +3,31 @@ import { ethers } from 'ethers';
 const darwiniaRpc = "http://c2.darwinia-rpc.itering.io:9944/";
 const darwiniaDwiller = "https://darwinia-rpc.dwellir.com";
 const crabRpc = "https://crab-rpc.darwinia.network/"
-const moonbeamRpc = "https://moonbeam-rpc.publicnode.com";
+const moonbeamRpc = "https://rpc.api.moonbeam.network";
+const moonbeamRpcPublic = "https://moonbeam-rpc.publicnode.com";
 
 let lastLog;
 
 async function getBlockByNumber(number) {
-    const provider = new ethers.JsonRpcProvider(darwiniaRpc);
+    const provider = new ethers.JsonRpcProvider(moonbeamRpc);
+    const requestTime = new Date().getTime();
     const block = await provider.getBlock(number);
     const log = `--- getBlockByNumber: ${block.number}, block_time: ${block.timestamp}, hash: ${block.hash}`
     if (lastLog != log) {
         lastLog = log;
-        console.log(`${new Date().getTime()}: ${log}`);
+        console.log(`${requestTime}: ${log}`);
     }
     return block;
 }
 
 async function getFinalized() {
-    const provider = new ethers.JsonRpcProvider(darwiniaRpc);
+    const provider = new ethers.JsonRpcProvider(moonbeamRpc);
+    const requestTime = new Date().getTime();
     const block = await provider.getBlock("finalized");
     const log = `--- getFinalized: ${block.number}, block_time: ${block.timestamp}, hash: ${block.hash}`;
     if (lastLog != log) {
         lastLog = log;
-        console.log(`${new Date().getTime()}: ${log}`);
+        console.log(`${requestTime}: ${log}`);
     }
     return block;
 }
