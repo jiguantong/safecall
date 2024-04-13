@@ -1,0 +1,39 @@
+
+import { ethers } from "ethers";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const abi = require("../abis/SubAPISignaturePub.json");
+
+
+const providerUrl = "https://rpc.api.moonbeam.network";
+const address = "0x8809f9b3ACEF1dA309f49b5Ab97A4C0faA64E6Ae";
+
+
+const privateKey = process.env.PRIVATE_KEY;
+const provider = new ethers.JsonRpcProvider(providerUrl);
+const signer = new ethers.Wallet(privateKey, provider);
+const contract = new ethers.Contract(address, abi, signer);
+
+async function main() {
+    for (let i = 0; i < 1000; i++) {
+        console.log("Prepare submit: ", i);
+        const tx = await contract['submit'](
+            123,
+            "0x42165Ce95b51D1B845C190C96fB30c4FeF6Abce4",
+            i,
+            "0x1234",
+            "0x1234",
+        )
+        await tx.wait();
+        console.log("submit: ", i);
+        await sleep(3000);
+    }
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
+await main();
