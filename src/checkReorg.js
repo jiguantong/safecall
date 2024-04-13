@@ -9,25 +9,25 @@ const moonbeamRpcPublic = "https://moonbeam-rpc.publicnode.com";
 let lastLog;
 
 async function getBlockByNumber(number) {
-    const provider = new ethers.JsonRpcProvider(moonbeamRpc);
+    const provider = new ethers.JsonRpcProvider(darwiniaRpc);
     const requestTime = new Date().getTime();
     const block = await provider.getBlock(number);
-    const log = `--- getBlockByNumber: ${block.number}, block_time: ${block.timestamp}, hash: ${block.hash}`
+    const log = `--- getBlockByNumber: ${block.number}, hash: ${block.hash}`
     if (lastLog != log) {
         lastLog = log;
-        console.log(`${requestTime}: ${log}`);
+        console.log(`${new Date().getTime() - requestTime} ms, requestTime: ${requestTime} : ${log}`);
     }
     return block;
 }
 
 async function getFinalized() {
-    const provider = new ethers.JsonRpcProvider(moonbeamRpc);
+    const provider = new ethers.JsonRpcProvider(darwiniaRpc);
     const requestTime = new Date().getTime();
     const block = await provider.getBlock("finalized");
-    const log = `--- getFinalized: ${block.number}, block_time: ${block.timestamp}, hash: ${block.hash}`;
+    const log = `--- getFinalized: ${block.number}, hash: ${block.hash}`;
     if (lastLog != log) {
         lastLog = log;
-        console.log(`${requestTime}: ${log}`);
+        console.log(`${new Date().getTime() - requestTime} ms, requestTime: ${requestTime} : ${log}`);
     }
     return block;
 }
@@ -61,7 +61,7 @@ async function main() {
             // console.log("skip == ", newBlock.number);
         } else if (newBlock.number < lastLocalBlock.number) {
             // reorg
-            console.log(`\n\t ==> ${new Date().getTime()}: !!reorg1 newBlock: ${newBlock.number} < localBlock: ${lastLocalBlock.number}\n`)
+            console.log(`\n\t ==> ${new Date().getTime()}: !!!### newBlock: ${newBlock.number} < localBlock: ${lastLocalBlock.number}\n`)
         } else if (newBlock.number > lastLocalBlock.number) {
             // normal
             const missingRange = range(lastLocalBlock.number + 1, newBlock.number);
@@ -72,7 +72,7 @@ async function main() {
             }
             newBlocks.push(newBlock);
             if (!isChainConsistent([...localBlocks, ...newBlocks])) {
-                console.log(`\n\t ==> ${new Date().getTime()}: !!!### reorg !consistent ${newBlock.number}\n`);
+                console.log(`\n\t ==> ${new Date().getTime()}: !!!### !consistent ${newBlock.number}\n`);
             } else {
                 localBlocks.push(...newBlocks);
                 console.log(`${new Date().getTime()}: append blocks`, lastLocalBlock.number, newBlocks[newBlocks.length - 1].number, localBlocks.length);
